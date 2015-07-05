@@ -8,7 +8,9 @@ import android.app.Activity;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -79,7 +81,7 @@ public class MainActivity extends Activity {
             default:
                 break;
         }
-        textView.setText("From: " + currentFromCurrency + "\nTo: " + currentToCurrency);
+        //textView.setText("From: " + currentFromCurrency + "\nTo: " + currentToCurrency);
         parentMenu.collapse();
         onWindowFocusChanged(true);
     }
@@ -98,5 +100,9 @@ public class MainActivity extends Activity {
                             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);}
     }
 
+    /** Makes a request to Yahoo Currency API */
+    public void makeYqlRequest() {
+
+    }
 
 }

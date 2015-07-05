@@ -12,24 +12,39 @@
         <!--android:text="@string/dummy_content" />-->
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_gravity="center">
 
+        <TextView android:id="@+id/FromPrompt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#FDE3A7"
+            android:textStyle="bold" android:textSize="50sp" android:gravity="center"
+            android:text="@string/from_string"/>
         <EditText android:id="@+id/some_text" style="@android:style/Widget.TextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" android:keepScreenOn="true"
         android:textColor="#FDE3A7"
         android:textStyle="bold" android:textSize="50sp" android:gravity="center"
-        android:text="@string/dummy_content"/>
+        android:text="@string/dummy_content"
+            android:inputType="numberDecimal"
+            android:singleLine="false"/>
 
+        <TextView android:id="@+id/ToPrompt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#FDE3A7"
+            android:textStyle="bold" android:textSize="50sp" android:gravity="center"
+            android:text="@string/to_string"/>
         <EditText android:id="@+id/some_text2" style="@android:style/Widget.TextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" android:keepScreenOn="true"
             android:textColor="#FDE3A7"
             android:textStyle="bold" android:textSize="50sp" android:gravity="center"
-            android:text="@string/dummy_content"/>
+            android:text="@string/dummy_content"
+            android:inputType="numberDecimal"/>
 
     </LinearLayout>
 

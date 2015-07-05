@@ -2,5 +2,7 @@
     <string name="app_name">Cool Currency</string>
 
     <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="dummy_content">0.0</string>
+    <string name="from_string">From</string>
+    <string name="to_string">To</string>
 </resources>
