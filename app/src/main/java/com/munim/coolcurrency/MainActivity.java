@@ -17,6 +17,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.HashMap;
+
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -28,12 +30,38 @@ public class MainActivity extends Activity {
 
     private String currentFromCurrency;
     private String currentToCurrency;
+    private double currentRate;
+    private double val1;
+    private HashMap<String, Double> rates;
+    private String[] countries;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         EditText et = (EditText) findViewById(R.id.some_text);
         et.setBackgroundResource(android.R.color.transparent);
+        et.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                try {
+                    val1 = Double.parseDouble(s.toString());
+                } catch (NumberFormatException e) {
+                    val1 = 0;
+                }
+                update();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
         EditText et2 = (EditText) findViewById(R.id.some_text2);
         et2.setBackgroundResource(android.R.color.transparent);
 
@@ -51,8 +79,14 @@ public class MainActivity extends Activity {
         bt = findViewById(R.id.to_curr3);
         bt.setBackgroundResource(R.drawable.uae);
 
+        countries = new String[] {"USD", "INR", "AED"};
+        rates = new HashMap<String, Double>();
+        rates.put("USD", 1.0);
+        rates.put("INR", 63.5449);
+        rates.put("AED", 3.6732);
         currentFromCurrency = "USD";
         currentToCurrency = "USD";
+        currentRate = 1.0;
     }
 
     public void send(View view) {
@@ -61,27 +95,28 @@ public class MainActivity extends Activity {
         FloatingActionsMenu parentMenu = (FloatingActionsMenu) view.getParent();
         switch (id) {
             case R.id.from_curr1:
-                currentFromCurrency = "USD";
+                currentFromCurrency = countries[0];
                 break;
             case R.id.from_curr2:
-                currentFromCurrency = "INR";
+                currentFromCurrency = countries[1];
                 break;
             case R.id.from_curr3:
-                currentFromCurrency = "AED";
+                currentFromCurrency = countries[2];
                 break;
             case R.id.to_curr1:
-                currentToCurrency = "USD";
+                currentToCurrency = countries[0];
                 break;
             case R.id.to_curr2:
-                currentToCurrency = "INR";
+                currentToCurrency = countries[1];
                 break;
             case R.id.to_curr3:
-                currentToCurrency = "AED";
+                currentToCurrency = countries[2];
                 break;
             default:
                 break;
         }
-        //textView.setText("From: " + currentFromCurrency + "\nTo: " + currentToCurrency);
+        currentRate = rates.get(currentToCurrency) / rates.get(currentFromCurrency);
+        update();
         parentMenu.collapse();
         onWindowFocusChanged(true);
     }
@@ -103,6 +138,12 @@ public class MainActivity extends Activity {
     /** Makes a request to Yahoo Currency API */
     public void makeYqlRequest() {
 
+    }
+
+    /** Updates the numbers on the screen */
+    public void update() {
+        TextView t2 = (TextView) findViewById(R.id.some_text2);
+        t2.setText(String.format("%.5f",(val1 * currentRate)));
     }
 
 }
