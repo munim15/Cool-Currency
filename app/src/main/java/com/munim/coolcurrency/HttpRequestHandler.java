@@ -22,6 +22,7 @@ public class HttpRequestHandler {
     public HttpRequestHandler(String url) {
         try {
             this.url = new URL(url);
+            rawContent = "";
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }

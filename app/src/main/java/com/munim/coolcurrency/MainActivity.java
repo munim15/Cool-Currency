@@ -3,19 +3,17 @@ package com.munim.coolcurrency;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.munim.coolcurrency.util.SystemUiHider;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
-import android.os.Build;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 
@@ -82,8 +80,10 @@ public class MainActivity extends Activity {
         countries = new String[] {"USD", "INR", "AED"};
         rates = new HashMap<String, Double>();
         rates.put("USD", 1.0);
-        rates.put("INR", 63.5449);
-        rates.put("AED", 3.6732);
+//        rates.put("INR", 63.5449);
+//        rates.put("AED", 3.6732);
+        RateFinder r = new RateFinder();
+        r.execute();
         currentFromCurrency = "USD";
         currentToCurrency = "USD";
         currentRate = 1.0;
@@ -137,14 +137,39 @@ public class MainActivity extends Activity {
 
     /** Makes a request to Yahoo Currency API */
     public void makeYqlRequest() {
-        String base_url1 = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%3D%22USDAED%22&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
+        String base_url1 = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%3D%22USDINR%22&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
         String base_url2 = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%3D%22USDAED%22&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
+        HttpRequestHandler handler1 = new HttpRequestHandler(base_url1);
+        HttpRequestHandler handler2 = new HttpRequestHandler(base_url2);
+        handler1.makeRequest();
+        handler2.makeRequest();
+        JSONObject json1 = handler1.getJSONObject();
+        JSONObject json2 = handler2.getJSONObject();
+        try {
+            rates.put("INR", json1.getJSONObject("query").
+                    getJSONObject("results").getJSONObject("rate").getDouble("Rate"));
+            rates.put("AED", json2.getJSONObject("query").
+                    getJSONObject("results").getJSONObject("rate").getDouble("Rate"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     /** Updates the numbers on the screen */
     public void update() {
         TextView t2 = (TextView) findViewById(R.id.some_text2);
         t2.setText(String.format("%.5f",(val1 * currentRate)));
+    }
+
+    private class RateFinder extends AsyncTask<Void, Void, Void> {
+
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            makeYqlRequest();
+            System.out.println("%%%%%%%%%%%%%%%%READY");
+            return null;
+        }
     }
 
 }
