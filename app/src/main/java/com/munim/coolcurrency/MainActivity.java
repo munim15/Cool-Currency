@@ -137,7 +137,8 @@ public class MainActivity extends Activity {
 
     /** Makes a request to Yahoo Currency API */
     public void makeYqlRequest() {
-
+        String base_url1 = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%3D%22USDAED%22&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
+        String base_url2 = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%3D%22USDAED%22&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
     }
 
     /** Updates the numbers on the screen */
