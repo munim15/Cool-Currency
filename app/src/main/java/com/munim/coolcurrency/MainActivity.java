@@ -2,6 +2,7 @@ package com.munim.coolcurrency;
 
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.munim.coolcurrency.util.SystemUiHider;
+import com.yalantis.phoenix.PullToRefreshView;
 
 import android.app.Activity;
 import android.os.AsyncTask;
@@ -35,6 +36,7 @@ public class MainActivity extends Activity {
     private double val1;
     private HashMap<String, Double> rates;
     private String[] countries;
+    private PullToRefreshView mPullToRefreshView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,11 +84,36 @@ public class MainActivity extends Activity {
 
         countries = new String[] {"USD", "INR", "AED"};
         rates = new HashMap<String, Double>();
-//        rates.put("USD", 1.0);
-//        rates.put("INR", 63.5449);
-//        rates.put("AED", 3.6732);
-        RateFinder r = new RateFinder();
-        r.execute();
+        rates.put("USD", 1.0);
+        rates.put("INR", 63.5449);
+        rates.put("AED", 3.6732);
+        mPullToRefreshView = (PullToRefreshView) findViewById(R.id.pull_to_refresh);
+        mPullToRefreshView.setOnRefreshListener(new PullToRefreshView.OnRefreshListener() {
+            @Override
+
+            public void onRefresh() {
+//                mPullToRefreshView.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//                        mPullToRefreshView.setRefreshing(false);
+//                    }
+//                }, 2000);
+                RateFinder r = new RateFinder();
+                r.execute();
+//                mPullToRefreshView.postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//
+//                        mPullToRefreshView.setRefreshing(false);
+//                    }
+//                }, 2000);
+//                update();
+
+            }
+        });
+//        RateFinder r = new RateFinder();
+//        r.execute();
         currentFromCurrency = "USD";
         currentToCurrency = "USD";
         currentRate = 1.0;
@@ -151,7 +178,7 @@ public class MainActivity extends Activity {
         handler3.makeRequest();
         JSONObject json1 = handler1.getJSONObject();
         JSONObject json2 = handler2.getJSONObject();
-        JSONObject json3 = handler3. getJSONObject();
+        JSONObject json3 = handler3.getJSONObject();
         try {
             rates.put(countries[0], json1.getJSONObject("query").
                     getJSONObject("results").getJSONObject("rate").getDouble("Rate"));
@@ -166,6 +193,7 @@ public class MainActivity extends Activity {
 
     /** Updates the numbers on the screen */
     public void update() {
+        currentRate = rates.get(currentToCurrency) / rates.get(currentFromCurrency);
         TextView t2 = (TextView) findViewById(R.id.some_text2);
         t2.setText(String.format("%.5f",(val1 * currentRate)));
     }
@@ -180,6 +208,11 @@ public class MainActivity extends Activity {
             return null;
         }
 
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            update();
+            mPullToRefreshView.setRefreshing(false);
+        }
     }
 
     private static String sanitize(String s) {

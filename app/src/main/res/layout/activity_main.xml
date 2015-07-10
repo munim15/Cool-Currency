@@ -10,12 +10,39 @@
         <!--android:layout_height="match_parent" android:keepScreenOn="true" android:textColor="#FDE3A7"-->
         <!--android:textStyle="bold" android:textSize="50sp" android:gravity="center"-->
         <!--android:text="@string/dummy_content" />-->
+    <com.yalantis.phoenix.PullToRefreshView
+        android:id="@+id/pull_to_refresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
+        <ListView
+            android:id="@+id/list_view"
+            android:divider="@null"
+            android:dividerHeight="0dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </com.yalantis.phoenix.PullToRefreshView>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <!--<Button-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_alignParentRight="true"/>-->
+        </RelativeLayout>
+    </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_gravity="center">
+        android:layout_gravity="center"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
 
         <TextView android:id="@+id/FromPrompt"
             android:layout_width="match_parent"
