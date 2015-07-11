@@ -65,13 +65,12 @@
             android:textColor="#FDE3A7"
             android:textStyle="bold" android:textSize="50sp" android:gravity="center"
             android:text="@string/to_string"/>
-        <EditText android:id="@+id/some_text2" style="@android:style/Widget.TextView"
+        <TextView android:id="@+id/some_text2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" android:keepScreenOn="true"
             android:textColor="#FDE3A7"
             android:textStyle="bold" android:textSize="50sp" android:gravity="center"
-            android:text="@string/dummy_content"
-            android:inputType="numberDecimal"/>
+            android:text="@string/dummy_content" />
 
     </LinearLayout>
 

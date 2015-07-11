@@ -5,17 +5,23 @@ import com.munim.coolcurrency.util.SystemUiHider;
 import com.yalantis.phoenix.PullToRefreshView;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.util.HashMap;
 
 
@@ -65,9 +71,6 @@ public class MainActivity extends Activity {
 
             }
         });
-        EditText et2 = (EditText) findViewById(R.id.some_text2);
-        et2.setBackgroundResource(android.R.color.transparent);
-
         /* Manually setting flags */
         View bt = findViewById(R.id.from_curr1);
         bt.setBackgroundResource(R.drawable.usa);
@@ -82,41 +85,34 @@ public class MainActivity extends Activity {
         bt = findViewById(R.id.to_curr3);
         bt.setBackgroundResource(R.drawable.uae);
 
-        countries = new String[] {"USD", "INR", "AED"};
+        SharedPreferences pref = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         rates = new HashMap<String, Double>();
-        rates.put("USD", 1.0);
-        rates.put("INR", 63.5449);
-        rates.put("AED", 3.6732);
+        if (pref == null) {
+            countries = new String[]{"USD", "INR", "AED"};
+            rates.put("USD", 1.0);
+            rates.put("INR", 63.5449);
+            rates.put("AED", 3.6732);
+
+        } else {
+            String s = pref.getString("currencies", null);
+            countries =  s == null ? new String[3]: s.split(":");
+            rates.put(countries[0], Double.parseDouble(pref.getString("curr0", "1.0")));
+            rates.put(countries[1], Double.parseDouble(pref.getString("curr1", "1.0")));
+            rates.put(countries[2], Double.parseDouble(pref.getString("curr2", "1.0")));
+        }
         mPullToRefreshView = (PullToRefreshView) findViewById(R.id.pull_to_refresh);
         mPullToRefreshView.setOnRefreshListener(new PullToRefreshView.OnRefreshListener() {
             @Override
 
             public void onRefresh() {
-//                mPullToRefreshView.postDelayed(new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                        mPullToRefreshView.setRefreshing(false);
-//                    }
-//                }, 2000);
                 RateFinder r = new RateFinder();
                 r.execute();
-//                mPullToRefreshView.postDelayed(new Runnable() {
-//                    @Override
-//                    public void run() {
-//
-//                        mPullToRefreshView.setRefreshing(false);
-//                    }
-//                }, 2000);
-//                update();
-
             }
         });
-//        RateFinder r = new RateFinder();
-//        r.execute();
-        currentFromCurrency = "USD";
-        currentToCurrency = "USD";
+        currentFromCurrency = countries[0];
+        currentToCurrency = countries[0];
         currentRate = 1.0;
+        update();
     }
 
     public void send(View view) {
@@ -165,6 +161,18 @@ public class MainActivity extends Activity {
                             | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);}
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        SharedPreferences prefs = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString("currencies", countries[0] + ":" + countries[1] + ":" + countries[2]);
+        editor.putString("curr0", rates.get(countries[0]).toString());
+        editor.putString("curr1", rates.get(countries[1]).toString());
+        editor.putString("curr2", rates.get(countries[2]).toString());
+        editor.commit();
+    }
+
     /** Makes a request to Yahoo Currency API */
     public void makeYqlRequest() {
         String url1 = String.format(sanitize(base_url), baseCurrency + countries[0]);
@@ -193,6 +201,10 @@ public class MainActivity extends Activity {
 
     /** Updates the numbers on the screen */
     public void update() {
+        TextView prompt1 = (TextView) findViewById(R.id.FromPrompt);
+        TextView prompt2 = (TextView) findViewById(R.id.ToPrompt);
+        prompt1.setText("From " + currentFromCurrency);
+        prompt2.setText("To " + currentToCurrency);
         currentRate = rates.get(currentToCurrency) / rates.get(currentFromCurrency);
         TextView t2 = (TextView) findViewById(R.id.some_text2);
         t2.setText(String.format("%.5f",(val1 * currentRate)));
@@ -204,7 +216,7 @@ public class MainActivity extends Activity {
         @Override
         protected Void doInBackground(Void... params) {
             makeYqlRequest();
-            System.out.println("%%%%%%%%%%%%%%%%READY");
+            Log.i("RateFinder", "%%%%%%%%%%%%%%%%READY");
             return null;
         }
 
@@ -218,5 +230,4 @@ public class MainActivity extends Activity {
     private static String sanitize(String s) {
         return s.replace("%", "%%").replace(replacementDummy, "%s");
     }
-
 }
