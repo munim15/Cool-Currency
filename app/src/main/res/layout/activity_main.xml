@@ -54,7 +54,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" android:keepScreenOn="true"
         android:textColor="#FDE3A7"
-        android:textStyle="bold" android:textSize="50sp" android:gravity="center"
+        android:textStyle="bold" android:textSize="40sp" android:gravity="center"
         android:text="@string/dummy_content"
             android:inputType="numberDecimal"
             android:singleLine="false"/>
@@ -69,7 +69,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" android:keepScreenOn="true"
             android:textColor="#FDE3A7"
-            android:textStyle="bold" android:textSize="50sp" android:gravity="center"
+            android:textStyle="bold" android:textSize="40sp" android:gravity="center"
             android:text="@string/dummy_content" />
 
     </LinearLayout>
@@ -142,6 +142,7 @@
 
                 </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
+
                 <com.getbase.floatingactionbutton.FloatingActionsMenu
                     android:id="@+id/to_menu"
                     android:layout_width="wrap_content"
@@ -172,6 +173,17 @@
 
             </RelativeLayout>
 
+
+
         </LinearLayout>
+    <TextView android:id="@+id/lastUpdated"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pull screen down to refresh."
+        android:textColor="#FDE3A7"
+        android:textSize="15sp"
+        android:textStyle="italic"
+        android:layout_gravity="bottom|center_horizontal"
+        android:gravity="center_horizontal"/>
 
 </FrameLayout>

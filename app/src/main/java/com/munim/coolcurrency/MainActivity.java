@@ -14,14 +14,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 
@@ -35,19 +34,22 @@ public class MainActivity extends Activity {
 
     private static final String base_url = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%3D%22CURRPAIR%22&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
     private static final String replacementDummy = "CURRPAIR";
-    private static final String baseCurrency = "USD";
+    private static final String baseCurrency = "usd";
     private String currentFromCurrency;
     private String currentToCurrency;
     private double currentRate;
     private double val1;
     private HashMap<String, Double> rates;
     private String[] countries;
+    private String date;
     private PullToRefreshView mPullToRefreshView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
         EditText et = (EditText) findViewById(R.id.some_text);
         et.setBackgroundResource(android.R.color.transparent);
         et.addTextChangedListener(new TextWatcher() {
@@ -71,27 +73,16 @@ public class MainActivity extends Activity {
 
             }
         });
-        /* Manually setting flags */
-        View bt = findViewById(R.id.from_curr1);
-        bt.setBackgroundResource(R.drawable.usa);
-        bt = findViewById(R.id.to_curr1);
-        bt.setBackgroundResource(R.drawable.usa);
-        bt = findViewById(R.id.from_curr2);
-        bt.setBackgroundResource(R.drawable.india);
-        bt = findViewById(R.id.to_curr2);
-        bt.setBackgroundResource(R.drawable.india);
-        bt = findViewById(R.id.from_curr3);
-        bt.setBackgroundResource(R.drawable.uae);
-        bt = findViewById(R.id.to_curr3);
-        bt.setBackgroundResource(R.drawable.uae);
 
         SharedPreferences pref = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         rates = new HashMap<String, Double>();
+        TextView lastUpdated = (TextView) findViewById(R.id.lastUpdated);
         if (pref == null) {
-            countries = new String[]{"USD", "INR", "AED"};
-            rates.put("USD", 1.0);
-            rates.put("INR", 63.5449);
-            rates.put("AED", 3.6732);
+            countries = new String[]{"usd", "inr", "aed"};
+            rates.put("usd", 1.0);
+            rates.put("inr", 63.5449);
+            rates.put("aed", 3.6732);
+            lastUpdated.setText("Using outdated rates.\nPull screen down to refresh.");
 
         } else {
             String s = pref.getString("currencies", null);
@@ -99,7 +90,25 @@ public class MainActivity extends Activity {
             rates.put(countries[0], Double.parseDouble(pref.getString("curr0", "1.0")));
             rates.put(countries[1], Double.parseDouble(pref.getString("curr1", "1.0")));
             rates.put(countries[2], Double.parseDouble(pref.getString("curr2", "1.0")));
+            date = pref.getString("date", "the Big Bang");
+            lastUpdated.setText("Last Updated at " + date + "\nPull screen down to refresh.");
         }
+
+        /* Manually setting flags */
+        View bt = findViewById(R.id.from_curr1);
+        bt.setBackgroundResource(getResources().getIdentifier(countries[0], "drawable", getPackageName()));
+        bt = findViewById(R.id.to_curr1);
+        bt.setBackgroundResource(getResources().getIdentifier(countries[0], "drawable", getPackageName()));
+        bt = findViewById(R.id.from_curr2);
+        bt.setBackgroundResource(getResources().getIdentifier(countries[1], "drawable", getPackageName()));
+        bt = findViewById(R.id.to_curr2);
+        bt.setBackgroundResource(getResources().getIdentifier(countries[1], "drawable", getPackageName()));
+        bt = findViewById(R.id.from_curr3);
+        bt.setBackgroundResource(getResources().getIdentifier(countries[2], "drawable", getPackageName()));
+        bt = findViewById(R.id.to_curr3);
+        bt.setBackgroundResource(getResources().getIdentifier(countries[2], "drawable", getPackageName()));
+
+
         mPullToRefreshView = (PullToRefreshView) findViewById(R.id.pull_to_refresh);
         mPullToRefreshView.setOnRefreshListener(new PullToRefreshView.OnRefreshListener() {
             @Override
@@ -170,14 +179,16 @@ public class MainActivity extends Activity {
         editor.putString("curr0", rates.get(countries[0]).toString());
         editor.putString("curr1", rates.get(countries[1]).toString());
         editor.putString("curr2", rates.get(countries[2]).toString());
+        editor.putString("date", date);
         editor.commit();
     }
 
     /** Makes a request to Yahoo Currency API */
     public void makeYqlRequest() {
-        String url1 = String.format(sanitize(base_url), baseCurrency + countries[0]);
-        String url2 = String.format(sanitize(base_url), baseCurrency + countries[1]);
-        String url3 = String.format(sanitize(base_url), baseCurrency + countries[2]);
+        String sanitized = sanitize(base_url);
+        String url1 = String.format(sanitized, baseCurrency + countries[0]);
+        String url2 = String.format(sanitized, baseCurrency + countries[1]);
+        String url3 = String.format(sanitized, baseCurrency + countries[2]);
         HttpRequestHandler handler1 = new HttpRequestHandler(url1);
         HttpRequestHandler handler2 = new HttpRequestHandler(url2);
         HttpRequestHandler handler3 = new HttpRequestHandler(url3);
@@ -203,11 +214,12 @@ public class MainActivity extends Activity {
     public void update() {
         TextView prompt1 = (TextView) findViewById(R.id.FromPrompt);
         TextView prompt2 = (TextView) findViewById(R.id.ToPrompt);
-        prompt1.setText("From " + currentFromCurrency);
-        prompt2.setText("To " + currentToCurrency);
+        prompt1.setText("From " + currentFromCurrency.toUpperCase());
+        prompt2.setText("To " + currentToCurrency.toUpperCase());
         currentRate = rates.get(currentToCurrency) / rates.get(currentFromCurrency);
         TextView t2 = (TextView) findViewById(R.id.some_text2);
         t2.setText(String.format("%.5f",(val1 * currentRate)));
+        onWindowFocusChanged(true);
     }
 
     private class RateFinder extends AsyncTask<Void, Void, Void> {
@@ -224,6 +236,9 @@ public class MainActivity extends Activity {
         protected void onPostExecute(Void aVoid) {
             update();
             mPullToRefreshView.setRefreshing(false);
+            date = (new SimpleDateFormat("dd-MM-yyyy hh:mm:ss z").format(new Date()).toString());
+            TextView lastUpdated = (TextView) findViewById(R.id.lastUpdated);
+            lastUpdated.setText("Last Updated at " + date + "\nPull screen down to refresh.");
         }
     }
 
