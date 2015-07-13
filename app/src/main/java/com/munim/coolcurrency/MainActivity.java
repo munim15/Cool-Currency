@@ -45,7 +45,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         EditText et = (EditText) findViewById(R.id.some_text);
         et.setBackgroundResource(android.R.color.transparent);
         et.addTextChangedListener(new TextWatcher() {
@@ -73,6 +72,7 @@ public class MainActivity extends Activity {
         SharedPreferences pref = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         rates = new HashMap<String, Double>();
         TextView lastUpdated = (TextView) findViewById(R.id.lastUpdated);
+        boolean shouldRefresh = false;
         if (pref == null) {
             countries = new String[]{"usd", "inr", "aed"};
             rates.put("usd", 1.0);
@@ -82,12 +82,14 @@ public class MainActivity extends Activity {
 
         } else {
             String s = pref.getString("currencies", null);
+            Log.i("SHARED STUFF", s);
             countries =  s == null ? new String[3]: s.split(":");
             rates.put(countries[0], Double.parseDouble(pref.getString("curr0", "1.0")));
             rates.put(countries[1], Double.parseDouble(pref.getString("curr1", "1.0")));
             rates.put(countries[2], Double.parseDouble(pref.getString("curr2", "1.0")));
             date = pref.getString("date", "the Big Bang");
             lastUpdated.setText("Last Updated at " + date + "\nPull screen down to refresh.");
+            shouldRefresh = pref.getBoolean("shouldRefresh", false);
         }
 
         /* Manually setting flags */
@@ -104,7 +106,6 @@ public class MainActivity extends Activity {
         bt = findViewById(R.id.to_curr3);
         bt.setBackgroundResource(getResources().getIdentifier(countries[2], "drawable", getPackageName()));
 
-
         mPullToRefreshView = (PullToRefreshView) findViewById(R.id.pull_to_refresh);
         mPullToRefreshView.setOnRefreshListener(new PullToRefreshView.OnRefreshListener() {
             @Override
@@ -114,10 +115,17 @@ public class MainActivity extends Activity {
                 r.execute();
             }
         });
+
         currentFromCurrency = countries[0];
         currentToCurrency = countries[0];
         currentRate = 1.0;
         update();
+
+        if (shouldRefresh) {
+            Log.i("IN REFRSH", "muhaha");
+            RateFinder r = new RateFinder();
+            r.execute();
+        }
 
         Button btn = (Button) findViewById(R.id.prefs);
         btn.setOnClickListener(new View.OnClickListener() {
@@ -185,6 +193,7 @@ public class MainActivity extends Activity {
         editor.putString("curr1", rates.get(countries[1]).toString());
         editor.putString("curr2", rates.get(countries[2]).toString());
         editor.putString("date", date);
+        editor.putBoolean("shouldRefresh", false);
         editor.commit();
     }
 

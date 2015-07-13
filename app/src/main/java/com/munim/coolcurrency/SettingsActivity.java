@@ -2,6 +2,7 @@ package com.munim.coolcurrency;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -19,26 +21,51 @@ import android.widget.TextView;
 
 public class SettingsActivity extends Activity {
 
-    private String[] countryList = {"USA (USD)", "India (INR)", "UAE (AED)"};
-    private Integer[] img = {R.drawable.usd, R.drawable.inr, R.drawable.aed};
+    private String[] countryList = {"USA (USD)", "India (INR)", "UAE (AED)", "European Union (EUR)",
+                                    "China (CNY)", "Japan (JPY)", "United Kingdom (GBP)"};
+    private Integer[] img = {R.drawable.usd, R.drawable.inr, R.drawable.aed, R.drawable.eur,
+                             R.drawable.cny, R.drawable.jpy, R.drawable.gbp};
+    private int[] positions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        SharedPreferences pref = getSharedPreferences("MyPrefs", MODE_PRIVATE);
+        final SharedPreferences pref = getSharedPreferences("MyPrefs", MODE_PRIVATE);
         String s = pref.getString("currencies", null);
-        Log.i("SETTINGS ACTIVITY", s);
         String[] countries =  s == null ? new String[3]: s.split(":");
+        if (pref.getInt("pos1", -1) == -1) {
+            positions = new int[] {0, 1, 2};
+        } else {
+            positions = new int[] {pref.getInt("pos1", -1), pref.getInt("pos2", -1), pref.getInt("pos3", -1)};
+        }
         Spinner spinner1 = (Spinner) findViewById(R.id.spinner1);
-        spinner1.setAdapter(new CustomAdapter(this, R.layout.row, countryList, img));
-        spinner1.setSelection(0);
+        spinner1.setAdapter(new CustomAdapter(this, R.layout.row, countryList, img, 0));
+        spinner1.setSelection(positions[0]);
         Spinner spinner2 = (Spinner) findViewById(R.id.spinner2);
-        spinner2.setAdapter(new CustomAdapter(this, R.layout.row, countryList, img));
-        spinner2.setSelection(1);
+        spinner2.setAdapter(new CustomAdapter(this, R.layout.row, countryList, img, 1));
+        spinner2.setSelection(positions[1]);
         Spinner spinner3 = (Spinner) findViewById(R.id.spinner3);
-        spinner3.setAdapter(new CustomAdapter(this, R.layout.row, countryList, img));
-        spinner3.setSelection(2);
+        spinner3.setAdapter(new CustomAdapter(this, R.layout.row, countryList, img, 2));
+        spinner3.setSelection(positions[2]);
+        Button bttn = (Button) findViewById(R.id.done);
+        bttn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SharedPreferences.Editor edit = pref.edit();
+                edit.putInt("pos1", positions[0]);
+                edit.putInt("pos2", positions[1]);
+                edit.putInt("pos3", positions[2]);
+                String str1 = countryList[positions[0]].substring(countryList[positions[0]].length() - 4,countryList[positions[0]].length() - 1).toLowerCase();
+                String str2 = countryList[positions[1]].substring(countryList[positions[1]].length() - 4,countryList[positions[1]].length() - 1).toLowerCase();
+                String str3 = countryList[positions[2]].substring(countryList[positions[2]].length() - 4,countryList[positions[2]].length() - 1).toLowerCase();
+                edit.putString("currencies", str1 + ":" + str2 + ":" + str3);
+                edit.putBoolean("shouldRefresh", true);
+                edit.apply();
+                Intent intent = new Intent(SettingsActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -65,8 +92,11 @@ public class SettingsActivity extends Activity {
 
     private class CustomAdapter extends ArrayAdapter<String> {
 
-        CustomAdapter(Context context, int textViewResourceId, String[] objects, Integer[] img) {
+        private int number;
+
+        CustomAdapter(Context context, int textViewResourceId, String[] objects, Integer[] img, int number) {
             super(context, textViewResourceId, objects);
+            this.number = number;
         }
 
         @Override
@@ -83,6 +113,7 @@ public class SettingsActivity extends Activity {
             LayoutInflater inflater = getLayoutInflater();
             View row = inflater.inflate(R.layout.row, parent, false);
             TextView label = (TextView) row.findViewById(R.id.country);
+            positions[number] = position;
             label.setText(countryList[position]);
             ImageView icon = (ImageView) row.findViewById(R.id.icon);
             icon.setImageResource(img[position]);
