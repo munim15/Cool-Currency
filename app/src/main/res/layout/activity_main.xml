@@ -54,13 +54,14 @@
             android:textStyle="bold" android:textSize="50sp" android:gravity="center"
             android:text="@string/from_string"/>
         <EditText android:id="@+id/some_text" style="@android:style/Widget.TextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" android:keepScreenOn="true"
-        android:textColor="#FDE3A7"
-        android:textStyle="bold" android:textSize="40sp" android:gravity="center"
-        android:text="@string/dummy_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:keepScreenOn="true"
+            android:textColor="#FDE3A7"
+            android:textStyle="bold" android:textSize="40sp" android:gravity="center"
+            android:text="@string/dummy_content"
             android:inputType="numberDecimal"
-            android:singleLine="false"/>
+            android:singleLine="false"
+            />
 
         <TextView android:id="@+id/ToPrompt"
             android:layout_width="match_parent"

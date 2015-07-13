@@ -5,8 +5,12 @@ import com.munim.coolcurrency.util.SystemUiHider;
 import com.yalantis.phoenix.PullToRefreshView;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
@@ -26,6 +30,9 @@ import java.util.Date;
 import java.util.HashMap;
 
 
+/** Main Activity for Application.
+ * @author Munim Ali
+ */
 public class MainActivity extends Activity {
 
     private static final String base_url = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%3D%22CURRPAIR%22&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
@@ -45,8 +52,11 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Typeface typeFace=Typeface.createFromAsset(getAssets(),"LED.Font.ttf");
         EditText et = (EditText) findViewById(R.id.some_text);
         et.setBackgroundResource(android.R.color.transparent);
+        et.setTypeface(typeFace);
+        ((TextView) findViewById(R.id.some_text2)).setTypeface(typeFace);
         et.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -198,7 +208,11 @@ public class MainActivity extends Activity {
     }
 
     /** Makes a request to Yahoo Currency API */
-    public void makeYqlRequest() {
+    public boolean makeYqlRequest() {
+        if (!isNetworkAvailable()) {
+            Log.i("YQL", "No network connectivity");
+            return false;
+        }
         String sanitized = sanitize(base_url);
         String url1 = String.format(sanitized, baseCurrency + countries[0]);
         String url2 = String.format(sanitized, baseCurrency + countries[1]);
@@ -222,6 +236,7 @@ public class MainActivity extends Activity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        return true;
     }
 
     /** Updates the numbers on the screen */
@@ -236,27 +251,38 @@ public class MainActivity extends Activity {
         onWindowFocusChanged(true);
     }
 
-    private class RateFinder extends AsyncTask<Void, Void, Void> {
+    private class RateFinder extends AsyncTask<Void, Void, Boolean> {
 
 
         @Override
-        protected Void doInBackground(Void... params) {
-            makeYqlRequest();
+        protected Boolean doInBackground(Void... params) {
+            boolean response = makeYqlRequest();
             Log.i("RateFinder", "%%%%%%%%%%%%%%%%READY");
-            return null;
+            return response;
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            update();
-            mPullToRefreshView.setRefreshing(false);
-            date = (new SimpleDateFormat("dd-MM-yyyy hh:mm:ss z").format(new Date()).toString());
-            TextView lastUpdated = (TextView) findViewById(R.id.lastUpdated);
-            lastUpdated.setText("Last Updated at " + date + "\nPull screen down to refresh.");
+        protected void onPostExecute(Boolean success) {
+            if (success) {
+                update();
+                mPullToRefreshView.setRefreshing(false);
+                date = (new SimpleDateFormat("dd-MM-yyyy hh:mm:ss z").format(new Date()).toString());
+                TextView lastUpdated = (TextView) findViewById(R.id.lastUpdated);
+                lastUpdated.setText("Last Updated at " + date + "\nPull screen down to refresh.");
+            } else {
+                mPullToRefreshView.setRefreshing(false);
+                Toast.makeText(getApplicationContext(), "No Network Connectivity Detected", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
     private static String sanitize(String s) {
         return s.replace("%", "%%").replace(replacementDummy, "%s");
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }

@@ -18,7 +18,9 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-
+/** Saves 3 Quick access currency preferences.
+ * @author Munim Ali
+ */
 public class SettingsActivity extends Activity {
 
     private String[] countryList = {"USA (USD)", "India (INR)", "UAE (AED)", "European Union (EUR)",

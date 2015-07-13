@@ -11,8 +11,10 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-/**
- * Created by munim on 7/7/15.
+/** A Http GET Request Handler
+ *  Response is available to caller either
+ *  as a raw String or JSON object.
+ * @author Munim Ali
  */
 public class HttpRequestHandler {
 
