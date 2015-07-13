@@ -5,4 +5,8 @@
     <string name="dummy_content">0.0</string>
     <string name="from_string">From</string>
     <string name="to_string">To</string>
+    <string name="title_activity_settings">SettingsActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
 </resources>

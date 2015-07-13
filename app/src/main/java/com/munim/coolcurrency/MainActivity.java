@@ -5,6 +5,7 @@ import com.munim.coolcurrency.util.SystemUiHider;
 import com.yalantis.phoenix.PullToRefreshView;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,12 +26,6 @@ import java.util.Date;
 import java.util.HashMap;
 
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- *
- * @see SystemUiHider
- */
 public class MainActivity extends Activity {
 
     private static final String base_url = "https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%3D%22CURRPAIR%22&format=json&diagnostics=true&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys&callback=";
@@ -122,6 +118,15 @@ public class MainActivity extends Activity {
         currentToCurrency = countries[0];
         currentRate = 1.0;
         update();
+
+        Button btn = (Button) findViewById(R.id.prefs);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     public void send(View view) {
